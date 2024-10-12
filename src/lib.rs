@@ -2,11 +2,10 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 trait Widget {
-    fn changed(&self) {
-        let widget: Box<&dyn Widget> = Box::new(self);
-        self.director().borrow_mut().widget_changed(widget);
+    fn changed(widget: Box<dyn Widget>) {
+        self.director().borrow_mut().widget_changed(self);
     }
-    fn director(&self) -> Rc<RefCell<dyn Director>>;
+    fn director(widget: Box<dyn Widget>) -> Rc<RefCell<dyn Director>>;
 }
 
 trait Director {
