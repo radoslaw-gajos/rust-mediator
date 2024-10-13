@@ -39,12 +39,20 @@ fn attach(
 impl Widget for RadioWidget {
 }
 
+impl RadioWidget {
+    fn new(director: Rc<RefCell<Box<dyn Director>>>) -> Box<dyn Widget> {
+        Box::new(RadioWidget {
+            director,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn foo() {
+    fn should_attach_widget() {
         let director = FoodDirector::new();
     }
 }
