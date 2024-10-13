@@ -14,6 +14,9 @@ trait Director {
 }
 
 trait Widget {
+    // mediator methods
+    fn changed(&self);
+
     // helper methods
     fn as_any(&self) -> &dyn Any;
     fn as_mut_any(&mut self) -> &mut dyn Any;
@@ -88,6 +91,13 @@ fn attach(
 }
 
 impl Widget for RadioWidget {
+    // mediator methods
+    fn changed(&self) {
+        self.director
+            .borrow_mut()
+            .widget_changed(LIKES_PIZZA.to_string());
+    }
+
     // helper methods
     fn as_any(&self) -> &dyn Any {
         self
@@ -113,6 +123,10 @@ struct TextFieldWidget {
 
 
 impl Widget for TextFieldWidget {
+    // mediator methods
+    fn changed(&self) {
+    }
+
     // helper methods
     fn as_any(&self) -> &dyn Any {
         self
@@ -179,7 +193,26 @@ mod tests {
 
         director.borrow_mut().widget_changed(LIKES_PIZZA.to_string());
 
+        // TODO: probably I could make it work by turning widgets into Rc<RefCell's
+        // for now I abandon this to stay sane
+        /*
+        {
+            let mut likes_pizza_radio = director.borrow_mut()
+                .as_mut_any()
+                .downcast_mut::<FoodDirector>()
+                .unwrap()
+                .widgets.get_mut(LIKES_PIZZA)
+                .unwrap()
+                .as_mut_any()
+                .downcast_mut::<RadioWidget>()
+                .unwrap();
+
+            likes_pizza_radio.changed();
+        }
+        */
+
         // then
+        // TODO: refactor
         let textfield_enabled = director.borrow()
             .as_any()
             .downcast_ref::<FoodDirector>()
