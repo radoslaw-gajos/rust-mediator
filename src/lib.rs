@@ -54,5 +54,7 @@ mod tests {
     #[test]
     fn should_attach_widget() {
         let director = FoodDirector::new();
+        let director = Rc::new(RefCell::new(director));
+        let widget = RadioWidget::new(Rc::clone(&director));
     }
 }
