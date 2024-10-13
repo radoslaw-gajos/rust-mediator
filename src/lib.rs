@@ -1,4 +1,6 @@
 use std::any::Any;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 trait Widget {
     fn changed(&self, director: &Box<dyn Director>);
@@ -7,6 +9,8 @@ trait Widget {
 
 struct RadioWidget {
     value: bool,
+    //director: Option<Rc<Box<dyn Director>>>,
+    director: Rc<RefCell<Option<Box<dyn Director>>>>,
 }
 
 impl Widget for RadioWidget {
@@ -21,16 +25,24 @@ impl RadioWidget {
     fn new() -> Box<dyn Widget> {
         Box::new(RadioWidget {
             value: false,
+            director: Rc::new(RefCell::new(None)),
         })
     }
 }
 
 trait Director {
     fn widget_changed(&self, widget: &str);
+    fn as_any(&self) -> &dyn Any;
 }
 
 struct FoodDirector {
     radio: Box<dyn Widget>,
+}
+
+fn radio_from_widget(widget: &Box<dyn Widget>) -> &RadioWidget{
+    widget.as_any()
+        .downcast_ref::<RadioWidget>()
+        .unwrap()
 }
 
 impl Director for FoodDirector {
@@ -38,10 +50,7 @@ impl Director for FoodDirector {
         match widget {
             "radio" => {
                 println!("Radio changed");
-                let radio = self.radio.as_any()
-                    .downcast_ref::<RadioWidget>()
-                    .unwrap();
-
+                let radio = radio_from_widget(&self.radio);
                 println!("Radio value: {}", radio.value);
 
             },
@@ -49,6 +58,10 @@ impl Director for FoodDirector {
                 println!("{other} changed");
             }
         }
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -60,6 +73,13 @@ impl FoodDirector {
     }
 }
 
+fn food_dir_from_widget(director: &Box<dyn Director>) -> &FoodDirector {
+    director.as_any()
+        .downcast_ref::<FoodDirector>()
+        .unwrap()
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -68,6 +88,21 @@ mod tests {
     fn foo() {
         let radio: Box<dyn Widget> = RadioWidget::new();
         let director: Box<dyn Director> = FoodDirector::new(radio);
+
+        let food_dir = food_dir_from_widget(&director);
+        let radio = radio_from_widget(&food_dir.radio);
+
+        //let director = Rc::new(director);
+        //radio.director = Some(Rc::clone(&director));
+        //let radio_director = radio.director;
+        let radio_director = &radio.director;
+        /*
+        if let Some(rd) = *radio_director.borrow_mut() {
+        }
+        */
+        //let radio_director = *radio_director.borrow_mut()
+        //(*radio_director.borrow_mut().unwrap()) = *director;
+        *radio_director.borrow_mut() = Some(director);
 
         director.widget_changed("radio");
     }
