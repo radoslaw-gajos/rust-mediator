@@ -6,7 +6,11 @@ pub mod director {
     use std::rc::Rc;
 
     pub trait Director {
+        /// adds a widget for specific key
         fn attach(&self, key: String, widget: Rc<dyn Widget>);
+
+        /// gets a widget based on the key.
+        /// Panics if key is invalid.
         fn get(&self, key: String) -> Rc<dyn Widget>;
     }
 }
@@ -14,6 +18,8 @@ pub mod director {
 pub mod food_director {
     use crate::director::Director;
     use crate::widget::Widget;
+    use crate::radio_widget::RadioWidget;
+    use crate::text_input_widget::TextInputWidget;
 
     use std::rc::Rc;
     use std::cell::RefCell;
@@ -39,11 +45,24 @@ pub mod food_director {
         }
     }
 
+    const LIKES_PIZZA: &str = "LIKES_PIZZA";
+    const FAVOURITE_PIZZA: &str = "FAVOURITE_PIZZA";
+
     impl FoodDirector {
         fn new() -> Rc<dyn Director> {
             Rc::new(FoodDirector {
                 widgets: RefCell::new(HashMap::new()),
             })
+        }
+
+        fn add_likes_pizza(&self) {
+            let likes_pizza = RadioWidget::new();
+            self.attach(LIKES_PIZZA.to_string(), likes_pizza);
+        }
+
+        fn add_favourite_pizza(&self) {
+            let favourite_pizza = TextInputWidget::new();
+            self.attach(FAVOURITE_PIZZA.to_string(), favourite_pizza);
         }
     }
 
@@ -68,6 +87,12 @@ pub mod food_director {
 
             // then
             assert!(Rc::ptr_eq(&widget, &result));
+        }
+
+        #[test]
+        fn should_enable_favourite_pizza_when_likes_pizza() {
+            // given
+            let director = FoodDirector::new();
         }
     }
 }
