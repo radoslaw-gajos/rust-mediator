@@ -19,6 +19,14 @@ pub mod food_director {
 
     impl Director for FoodDirector {
     }
+
+    impl FoodDirector {
+        pub fn new() -> Rc<dyn Director> {
+            Rc::new(FoodDirector {
+                widgets: RefCell::new(HashMap::new()),
+            })
+        }
+    }
 }
 
 pub mod widget {
@@ -30,6 +38,7 @@ pub mod radio_widget {
     use crate::widget::Widget;
 
     use std::cell::RefCell;
+    use std::rc::Rc;
 
     pub struct RadioWidget {
         value: RefCell<bool>,
@@ -37,10 +46,21 @@ pub mod radio_widget {
 
     impl Widget for RadioWidget {
     }
+
+    impl RadioWidget {
+        pub fn new() -> Rc<dyn Widget> {
+            Rc::new(RadioWidget {
+                value: RefCell::new(false),
+            })
+        }
+    }
 }
 
 pub mod text_input_widget {
     use crate::widget::Widget;
+
+    use std::cell::RefCell;
+    use std::rc::Rc;
 
     pub struct TextInputWidget {
         value: RefCell<String>,
@@ -48,6 +68,15 @@ pub mod text_input_widget {
     }
 
     impl Widget for TextInputWidget {
+    }
+
+    impl TextInputWidget {
+        pub fn new() -> Rc<dyn Widget> {
+            Rc::new(TextInputWidget {
+                value: RefCell::new("".to_string()),
+                enabled: RefCell::new(false),
+            })
+        }
     }
 }
 
